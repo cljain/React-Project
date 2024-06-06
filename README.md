@@ -7,3 +7,6 @@
 
 
 ### 2) [VoterInfoForm:](https://github.com/cljain/React-Project/tree/main/VoterInfoForm)
+
+![image](https://github.com/cljain/React-Project/assets/138676234/236ac861-5944-4a46-8334-d0c7bba7430d)
+
