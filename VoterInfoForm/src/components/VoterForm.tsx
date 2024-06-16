@@ -3,21 +3,21 @@ import axios from "axios";
 import {
   Box,
   Button,
-  Checkbox,
   Divider,
-  FormControlLabel,
   Grid,
-  MenuItem,
-  TextField,
   Typography,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
 } from "@mui/material";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useForm, Controller } from "react-hook-form";
+import FormTextField from "./FormTextField";
+import FormCheckbox from "./FormCheckbox";
+import FormAutocomplete from "./FormAutocomplete";
+import { maxLength, emailPattern, requiredField } from "./validation";
 
 const VoterInfoForm: React.FC = () => {
   const {
@@ -25,54 +25,20 @@ const VoterInfoForm: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      prefix: "",
-      lastName: "",
-      firstName: "",
-      middleName: "",
-      suffix: "",
-      gender: "",
-      dateOfBirth: "",
-      age: "",
-      registrationDate: "",
-      registrationType: "",
-      changeDate: "",
-      usCitizen: false,
-      ssn: "",
-      drivingLicense: "",
-      identificationType: "",
-      identificationNumber: "",
-      proofOfIdProvided: false,
-      noDriversLicense: false,
-      email: "",
-      phoneNumber: "",
-      status: "",
-      statusReason: "",
-      disability: "",
-      challenged: false,
-      furtherAction: false,
-      furtherActionReason: "",
-      furtherActionDescription: "",
-    },
-  });
+  } = useForm();
 
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     axios
       .get("https://mocki.io/v1/ab79d280-350d-498e-a987-d53fd3b89ff9")
-      .then((response) => {
-        reset(response.data); // Reset the form with fetched data
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+      .then((response) => reset(response.data))
+      .catch((error) => console.error("Error fetching data:", error));
   }, [reset]);
 
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<FormData> = (data) => {
     setOpen(true);
+    // Further processing of the data can be done here
   };
 
   const handleDialogClose = (action: string) => {
@@ -81,6 +47,12 @@ const VoterInfoForm: React.FC = () => {
       toast.success("Your changes have been saved");
     }
   };
+
+  const prefixes = ["Ms.", "Mr.", "Mrs."];
+  const suffixes = ["Jr.", "Sr."];
+  const genders = ["Female", "Male"];
+  const registrationTypes = ["In Person With...", "Online", "Mail"];
+  const identificationTypes = ["Type 1", "Type 2", "Type 3"];
 
   return (
     <Box
@@ -98,394 +70,241 @@ const VoterInfoForm: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormAutocomplete
               name="prefix"
               control={control}
-              render={({ field }) => (
-                <TextField label="Prefix" fullWidth select {...field}>
-                  <MenuItem value="Ms.">Ms.</MenuItem>
-                  <MenuItem value="Mr.">Mr.</MenuItem>
-                  <MenuItem value="Mrs.">Mrs.</MenuItem>
-                </TextField>
-              )}
+              options={prefixes}
+              label="Prefix"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="lastName"
+              label="Last Name"
               control={control}
-              rules={{
-                required: "Last Name is required",
-                maxLength: {
-                  value: 30,
-                  message: "Last Name should not be greater than 30 characters",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  label="Last Name"
-                  fullWidth
-                  error={!!errors.lastName}
-                  helperText={errors.lastName ? errors.lastName.message : ""}
-                  {...field}
-                />
-              )}
+              rules={{ required: requiredField, maxLength: maxLength(30) }}
+              error={errors.lastName}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="firstName"
+              label="First Name"
               control={control}
-              rules={{
-                required: "First Name is required",
-                maxLength: {
-                  value: 30,
-                  message:
-                    "First Name should not be greater than 30 characters",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  label="First Name"
-                  fullWidth
-                  error={!!errors.firstName}
-                  helperText={errors.firstName ? errors.firstName.message : ""}
-                  {...field}
-                />
-              )}
+              rules={{ required: requiredField, maxLength: maxLength(30) }}
+              error={errors.firstName}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="middleName"
+              label="Middle Name"
               control={control}
-              render={({ field }) => (
-                <TextField label="Middle Name" fullWidth {...field} />
-              )}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormAutocomplete
               name="suffix"
               control={control}
-              render={({ field }) => (
-                <TextField label="Suffix" fullWidth select {...field}>
-                  <MenuItem value="Jr.">Jr.</MenuItem>
-                  <MenuItem value="Sr.">Sr.</MenuItem>
-                </TextField>
-              )}
+              options={suffixes}
+              label="Suffix"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormAutocomplete
               name="gender"
               control={control}
-              render={({ field }) => (
-                <TextField label="Gender" fullWidth select {...field}>
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Male">Male</MenuItem>
-                </TextField>
-              )}
+              options={genders}
+              label="Gender"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="dateOfBirth"
+              label="Date of Birth"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Date of Birth"
-                  fullWidth
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  {...field}
-                />
-              )}
+              type="date"
+              error={errors.dateOfBirth}
+              InputLabelProps={{
+                shrink: true,
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
-              name="age"
-              control={control}
-              render={({ field }) => (
-                <TextField label="Age" fullWidth {...field} />
-              )}
-            />
+            <FormTextField name="age" label="Age" control={control} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="registrationDate"
+              label="Registration Date"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Registration Date"
-                  fullWidth
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  {...field}
-                />
-              )}
+              type="date"
+              error={errors.registrationDate}
+              InputLabelProps={{
+                shrink: true,
+              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormAutocomplete
               name="registrationType"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Registration Type"
-                  fullWidth
-                  select
-                  {...field}
-                >
-                  <MenuItem value="In Person With...">
-                    In Person With...
-                  </MenuItem>
-                  <MenuItem value="Online">Online</MenuItem>
-                  <MenuItem value="Mail">Mail</MenuItem>
-                </TextField>
-              )}
+              options={registrationTypes}
+              label="Registration Type"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="changeDate"
+              label="Change Date"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Change Date"
-                  fullWidth
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  {...field}
-                />
-              )}
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
             />
           </Grid>
           <Grid item xs={12}>
             <Divider sx={{ borderColor: "red" }} />
           </Grid>
-          <Grid item xs={12}>
-            <Controller
+          <Grid item xs={12} sm={6} md={3}>
+            <FormCheckbox
               name="usCitizen"
+              label="US Citizen"
               control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={field.value} {...field} />}
-                  label="US Citizen"
-                />
-              )}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="ssn"
+              label="SSN"
               control={control}
-              render={({ field }) => (
-                <TextField label="Last 4 of SSN" fullWidth {...field} />
-              )}
+              rules={{ required: requiredField, maxLength: maxLength(9) }}
+              error={errors.ssn}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="drivingLicense"
+              label="Driving License"
               control={control}
-              render={({ field }) => (
-                <TextField label="Driving License" fullWidth {...field} />
-              )}
+              rules={{ maxLength: maxLength(20) }}
+              error={errors.drivingLicense}
+            />
+          </Grid>
+          <Grid item xs={12}></Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <FormCheckbox
+              name="proofOfIdProvided"
+              label="Proof of ID Provided"
+              control={control}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormAutocomplete
               name="identificationType"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Type of Identification"
-                  fullWidth
-                  select
-                  {...field}
-                >
-                  <MenuItem value="Select">Select</MenuItem>
-                </TextField>
-              )}
+              options={identificationTypes}
+              label="Identification Type"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="identificationNumber"
+              label="Identification Number"
               control={control}
-              render={({ field }) => (
-                <TextField label="Identification Number" fullWidth {...field} />
-              )}
             />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="proofOfIdProvided"
+            <FormCheckbox
+              name="noDriversLicense"
+              label="No Driver's License"
               control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={field.value} {...field} />}
-                  label="Proof of ID Provided"
-                />
-              )}
             />
           </Grid>
           <Grid item xs={12}>
             <Divider sx={{ borderColor: "red" }} />
+            <Typography variant="" gutterBottom>
+              (Not for public use)
+            </Typography>
           </Grid>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">Not for public use</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Controller
+          <Grid item xs={12} sm={6} md={3}>
+            <FormTextField
               name="email"
+              label="Email"
               control={control}
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                  message: "Enter a valid email address",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  label="E-Mail"
-                  fullWidth
-                  error={!!errors.email}
-                  helperText={errors.email ? errors.email.message : ""}
-                  {...field}
-                />
-              )}
+              rules={{ required: requiredField, pattern: emailPattern }}
+              error={errors.email}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <Controller
+          <Grid item xs={12} sm={6} md={3}>
+            <FormTextField
               name="phoneNumber"
+              label="Phone Number"
               control={control}
-              rules={{
-                required: "Phone Number is required",
-                pattern: {
-                  value: /^[0-9]{10}$/,
-                  message: "Enter a valid 10-digit phone number",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  label="Phone Number"
-                  fullWidth
-                  error={!!errors.phoneNumber}
-                  helperText={
-                    errors.phoneNumber ? errors.phoneNumber.message : ""
-                  }
-                  {...field}
-                />
-              )}
             />
           </Grid>
           <Grid item xs={12}>
             <Divider sx={{ borderColor: "red" }} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <TextField label="Status" fullWidth select {...field}>
-                  <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
-                </TextField>
-              )}
-            />
+            <FormTextField name="status" label="Status" control={control} />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="statusReason"
+              label="Status Reason"
               control={control}
-              render={({ field }) => (
-                <TextField label="Status Reason" fullWidth select {...field}>
-                  <MenuItem value="DMV Impo...">DMV Impo...</MenuItem>
-                </TextField>
-              )}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="disability"
+              label="Disability"
               control={control}
-              render={({ field }) => (
-                <TextField label="Disability" fullWidth select {...field}>
-                  <MenuItem value="Select">Select</MenuItem>
-                </TextField>
-              )}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormCheckbox
               name="challenged"
+              label="Challenged"
               control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={field.value} {...field} />}
-                  label="Challenged"
-                />
-              )}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Controller
+          <Grid item xs={12}>
+            <FormCheckbox
               name="furtherAction"
+              label="Further Action"
               control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Checkbox checked={field.value} {...field} />}
-                  label="Further Action"
-                />
-              )}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Controller
+            <FormTextField
               name="furtherActionReason"
+              label="Further Action Reason"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Further Action Reason"
-                  fullWidth
-                  select
-                  {...field}
-                >
-                  <MenuItem value="Select">Select</MenuItem>
-                </TextField>
-              )}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={6}>
-            <Controller
+          <Grid item xs={12} sm={6} md={3}>
+            <FormTextField
               name="furtherActionDescription"
+              label="Further Action Description"
               control={control}
-              render={({ field }) => (
-                <TextField
-                  label="Further Action Description"
-                  fullWidth
-                  {...field}
-                />
-              )}
             />
           </Grid>
         </Grid>
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>
         </Box>
       </form>
+
       <Dialog open={open} onClose={() => handleDialogClose("cancel")}>
-        <DialogTitle>Save Changes</DialogTitle>
+        <DialogTitle>Save Changes?</DialogTitle>
         <DialogContent>Do you want to save the changes?</DialogContent>
         <DialogActions>
-          <Button onClick={() => handleDialogClose("cancel")} color="primary">
+          <Button onClick={() => handleDialogClose("cancel")} color="secondary">
             Cancel
           </Button>
           <Button onClick={() => handleDialogClose("ok")} color="primary">
